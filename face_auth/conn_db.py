@@ -5,48 +5,58 @@ import json
 import numpy as np
 import face_recog
 import get_face
+import face_recognition
 
-DB_PATH = os.path.join("face_auth", "data_base.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def crear_tabla():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT UNIQUE NOT NULL,
-        embedding TEXT NOT NULL
-    )
-    """)
+conn = sqlite3.connect(f"{BASE_DIR}/data_base.db")
+cursor = conn.cursor()
+
+
+def np_array_to_Json(vector):
+    return json.dumps(vector.tolist())
+
+
+def json_to_np_array(vector_string):
+    return np.array(json.loads(vector_string))
+
+
+def exist_table(name_table):
+    cursor.execute(
+        """ SELECT COUNT(name) FROM SQLITE_MASTER WHERE TYPE = "table" AND name = "{}"  """.format(name_table))
+    if cursor.fetchone()[0] == 1:
+        return True
+    else:
+        return False
+
+
+""" Agrega un usuario a la base de datos"""
+
+
+def new_user(name, vector):
+    vector_json_string = np_array_to_Json(vector)
+    cursor.execute("""INSERT INTO "usuarios" (name,vector) VALUES ("{}","{}")""".format(
+        name, vector_json_string))
     conn.commit()
     conn.close()
 
-def guardar_usuario(nombre, embedding):
-    """Guarda el usuario serializando el embedding como JSON (TEXT)."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    embedding_str = json.dumps(embedding.tolist())  # numpy → lista → JSON
-    cursor.execute("INSERT OR REPLACE INTO usuarios (nombre, embedding) VALUES (?, ?)", (nombre, embedding_str))
-    conn.commit()
-    conn.close()
-    print(f"✅ Usuario '{nombre}' guardado en la base (TEXT)")
 
-def obtener_todos_los_usuarios():
-    """Devuelve [(nombre, numpy.array), ...] de todos los usuarios."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT nombre, embedding FROM usuarios")
-    filas = cursor.fetchall()
-    conn.close()
+def exist_user(vector):
+    vector_json_string = np_array_to_Json(vector)
+    cursor.execute("""SELECT * FROM "usuarios" """)
+    row = cursor.fetchone()
+    while row is not None:
+        vector_db = json_to_np_array(row[2])
+        exist_face = face_recognition.compare_faces([vector], vector_db)[0]
+        if exist_face:
+            return exist_face,row[1]
+        row = cursor.fetchone()
+    return False, None
 
-    usuarios = []
-    for nombre, emb_str in filas:
-        emb = np.array(json.loads(emb_str))  # JSON → lista → numpy.array
-        usuarios.append((nombre, emb))
-    return usuarios
 
-# 🔹 Crear tabla al importar
-v_embedding = face_recog.get_vector(get_face.get_face())
-crear_tabla()
-guardar_usuario("fidelCuloRoto",v_embedding)
-print(obtener_todos_los_usuarios())
+val, name = exist_user(face_recog.get_vector(get_face.get_face()))
+
+if val:
+    print(f"Hola queridoo, bienvenido {name}")
+else:
+    print("Disculpa! No te conocemos, te invitamos a Registrarte")
