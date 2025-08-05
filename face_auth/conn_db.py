@@ -33,16 +33,15 @@ def exist_table(name_table):
 """ Agrega un usuario a la base de datos"""
 
 
-def new_user(name, vector):
-    vector_json_string = np_array_to_Json(vector)
+def new_user(name, vector_json):
     cursor.execute("""INSERT INTO "usuarios" (name,vector) VALUES ("{}","{}")""".format(
-        name, vector_json_string))
+        name, vector_json))
     conn.commit()
     conn.close()
 
 
-def exist_user(vector):
-    vector_json_string = np_array_to_Json(vector)
+def exist_user(vector_json):
+    vector = json_to_np_array(vector_json)
     cursor.execute("""SELECT * FROM "usuarios" """)
     row = cursor.fetchone()
     while row is not None:
@@ -54,9 +53,9 @@ def exist_user(vector):
     return False, None
 
 
-val, name = exist_user(face_recog.get_vector(get_face.get_face()))
+# val, name = exist_user(face_recog.get_vector(get_face.get_face()))
 
-if val:
-    print(f"Hola queridoo, bienvenido {name}")
-else:
-    print("Disculpa! No te conocemos, te invitamos a Registrarte")
+# if val:
+#     print(f"Hola queridoo, bienvenido {name}")
+# else:
+#     print("Disculpa! No te conocemos, te invitamos a Registrarte")
