@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 import requests
 import os
-import conn_db
+from . import conn_db
 import sqlite3
 
 app = FastAPI()
