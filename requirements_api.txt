@@ -3,3 +3,5 @@ numpy==2.2.6
 requests==2.32.3
 setuptools==80.9.0
 uvicorn==0.35.0
+psycopg==3.2.9
+psycopg-binary==3.2.9

@@ -16,7 +16,7 @@ def main():
                 vector = face_recog.get_vector(get_face.get_face())
 
                 vector_string = conn_db.np_array_to_Json(vector)
-                url = "http://127.0.0.1:8000/procesar-vector"
+                url = "https://faceid-authentication.onrender.com/procesar-vector"
                 payload = {"vector": vector_string}
                 response = requests.post(url,json=payload)
                 
@@ -35,7 +35,7 @@ def main():
                 vector = face_recog.get_vector(get_face.get_face())
 
                 vector_string = conn_db.np_array_to_Json(vector)
-                url = "http://127.0.0.1:8000/procesar-vector"
+                url = "https://faceid-authentication.onrender.com/procesar-vector"
                 payload = {"vector": vector_string}
                 response = requests.post(url,json=payload)
                 
@@ -49,7 +49,7 @@ def main():
                 else:
                     name = input("Introduci un nombre de usuario: ")
                     
-                    url = "http://127.0.0.1:8000/register"
+                    url = "https://faceid-authentication.onrender.com/register"
                     payload.update({"name": name}) 
                     response = requests.post(url,json=payload)
                     message = response.json().get("message")

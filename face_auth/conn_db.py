@@ -1,5 +1,5 @@
 # db_manager.py (versión TEXT)
-import sqlite3
+import psycopg2
 import os
 import json
 import numpy as np
@@ -7,7 +7,7 @@ import numpy as np
 # import get_face
 # import face_recognition
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_BASE_URL = os.getenv("DATABASE_URL")
 
 
 def np_array_to_Json(vector):
@@ -19,7 +19,7 @@ def json_to_np_array(vector_string):
 
 
 def exist_table(name_table):
-    conn = sqlite3.connect(f"{BASE_DIR}/data_base.db")
+    conn = psycopg2.connect(DATA_BASE_URL)
     cursor = conn.cursor()
     cursor.execute(
         """ SELECT COUNT(name) FROM SQLITE_MASTER WHERE TYPE = "table" AND name = "{}"  """.format(name_table))
@@ -33,7 +33,7 @@ def exist_table(name_table):
 
 
 def new_user(name, vector_json):
-    conn = sqlite3.connect(f"{BASE_DIR}/data_base.db")
+    conn = psycopg2.connect(DATA_BASE_URL)
     cursor = conn.cursor()
     cursor.execute("""INSERT INTO "usuarios" (name,vector) VALUES ("{}","{}")""".format(
         name, vector_json))
@@ -42,7 +42,7 @@ def new_user(name, vector_json):
 
 
 def exist_user(vector_json):
-    conn = sqlite3.connect(f"{BASE_DIR}/data_base.db")
+    conn = psycopg2.connect(DATA_BASE_URL)
     cursor = conn.cursor()
 
     vector = json_to_np_array(vector_json)
