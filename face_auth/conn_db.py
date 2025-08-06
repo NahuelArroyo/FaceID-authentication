@@ -5,9 +5,10 @@ import json
 import numpy as np
 import face_recog
 import get_face
-import face_recognition
+# import face_recognition
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def np_array_to_Json(vector):
     return json.dumps(vector.tolist())
@@ -43,14 +44,19 @@ def new_user(name, vector_json):
 def exist_user(vector_json):
     conn = sqlite3.connect(f"{BASE_DIR}/data_base.db")
     cursor = conn.cursor()
-    
+
     vector = json_to_np_array(vector_json)
     cursor.execute("""SELECT * FROM "usuarios" """)
     row = cursor.fetchone()
     while row is not None:
         vector_db = json_to_np_array(row[2])
-        exist_face = face_recognition.compare_faces([vector], vector_db)[0]
+        exist_face = compare_vectors(vector, vector_db)
         if exist_face:
-            return exist_face,row[1]
+            return exist_face, row[1]
         row = cursor.fetchone()
     return False, None
+
+
+def compare_vectors(vec1, vec2, threshold=0.6):  # Luego colocar en un archivo utils
+    dist = np.linalg.norm(vec1 - vec2)
+    return dist < threshold
