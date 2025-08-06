@@ -12,7 +12,7 @@ async def proc_vector(request: Request):
     data = await request.json()
     vector_json = data.get("vector")
     val, name = conn_db.exist_user(vector_json)
-    return {"Exist": val, "Name": name}
+    return {"Exist": bool(val), "Name": name}
 
 
 @app.post("/register")
