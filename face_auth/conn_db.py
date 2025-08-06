@@ -1,5 +1,5 @@
 # db_manager.py (versión TEXT)
-import psycopg2
+import psycopg
 import os
 import json
 import numpy as np
@@ -19,13 +19,18 @@ def json_to_np_array(vector_string):
 
 
 def exist_table(name_table):
-    conn = psycopg2.connect(DATA_BASE_URL)
+    conn = psycopg.connect(DATA_BASE_URL)
     cursor = conn.cursor()
     cursor.execute(
         """ SELECT COUNT(name) FROM SQLITE_MASTER WHERE TYPE = "table" AND name = "{}"  """.format(name_table))
     if cursor.fetchone()[0] == 1:
         return True
     else:
+        cursor.execute("""CREATE TABLE usuarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            vector TEXT
+        )""")
         return False
 
 
@@ -33,7 +38,7 @@ def exist_table(name_table):
 
 
 def new_user(name, vector_json):
-    conn = psycopg2.connect(DATA_BASE_URL)
+    conn = psycopg.connect(DATA_BASE_URL)
     cursor = conn.cursor()
     cursor.execute("""INSERT INTO "usuarios" (name,vector) VALUES ("{}","{}")""".format(
         name, vector_json))
@@ -42,7 +47,7 @@ def new_user(name, vector_json):
 
 
 def exist_user(vector_json):
-    conn = psycopg2.connect(DATA_BASE_URL)
+    conn = psycopg.connect(DATA_BASE_URL)
     cursor = conn.cursor()
 
     vector = json_to_np_array(vector_json)
